@@ -1,0 +1,27 @@
+# 个人数据 / 备份(切勿上传)
+*.backup.json
+betledger-backup-*.json
+*-backup-*.json
+
+# 测试用注单截图 / 本地样本
+test_*.png
+test_*.jpg
+*.har
+uploads/
+samples/
+
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# 打包产物
+*.zip
+node_modules/
+
+# 本地密钥(以防有人误创建)
+*.key
+secrets.*
+.env

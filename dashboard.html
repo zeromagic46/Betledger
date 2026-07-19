@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>betledger — 注单追踪</title>
+<style>
+  :root {
+    --bg:#ffffff; --panel:#ffffff; --panel-soft:#fafafa;
+    --line:#ededed; --line-soft:#f3f3f3;
+    --ink:#0a0a0a; --ink-soft:#404040; --dim:#8a8a8a; --faint:#b8b8b8;
+    --side:#ffffff; --side-line:#efefef;
+    --active:#111111; --active-ink:#ffffff;
+    --win:#16a34a; --loss:#dc2626; --warn:#e8a020; --profit:#2563eb;
+    --winbg:#dcfce7; --lossbg:#fee2e2; --warnbg:#fef3c7;
+    --radius:12px;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Inter','Segoe UI','Microsoft YaHei',system-ui,sans-serif;
+    font-size:14px; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:ui-monospace,'SF Mono',Consolas,monospace; font-variant-numeric:tabular-nums; }
+  .app { display:flex; min-height:100vh; }
+
+  .side { width:246px; flex-shrink:0; background:var(--side);
+    border-right:1px solid var(--side-line); padding:20px 16px;
+    display:flex; flex-direction:column; gap:4px; position:sticky; top:0; height:100vh; }
+  .brand { display:flex; align-items:center; gap:10px; padding:4px 8px 20px; }
+  .brand-ic { width:34px; height:34px; border-radius:9px; background:#111;
+    display:flex; align-items:center; justify-content:center; color:#fff; }
+  .brand-t { font-weight:800; font-size:17px; letter-spacing:-.3px; }
+  .navitem { display:flex; align-items:center; gap:12px; padding:10px 12px;
+    border-radius:9px; cursor:pointer; color:var(--ink-soft); font-weight:500;
+    font-size:14px; border:none; background:transparent; width:100%; text-align:left;
+    font-family:inherit; transition:background .12s; }
+  .navitem:hover { background:var(--panel-soft); }
+  .navitem.on { background:var(--panel-soft); color:var(--ink); font-weight:600; }
+  .navitem.create { background:var(--active); color:var(--active-ink); font-weight:600; margin-bottom:8px; }
+  .navitem.create:hover { background:#000; }
+  .navitem svg { flex-shrink:0; }
+  .side-sp { flex:1; }
+
+  .main { flex:1; min-width:0; }
+  .topbar { display:flex; align-items:center; gap:14px; padding:22px 32px;
+    border-bottom:1px solid var(--line); }
+  .topbar h1 { margin:0; font-size:26px; font-weight:800; letter-spacing:-.5px; }
+  .content { padding:26px 32px 70px; }
+
+  .pagehead { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+  .ph-ic { width:38px; height:38px; border-radius:9px; background:var(--panel-soft);
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:var(--ink); }
+  .ph-t { font-size:15px; font-weight:800; letter-spacing:1px; font-family:ui-monospace,Consolas,monospace; }
+  .ph-live { display:flex; align-items:center; gap:6px; font-size:10.5px; color:var(--dim);
+    font-family:ui-monospace,Consolas,monospace; letter-spacing:.12em; margin-top:3px; }
+  .dot-live { width:8px; height:8px; border-radius:50%; background:var(--win); box-shadow:0 0 0 3px var(--winbg); }
+  .form { margin-left:auto; display:flex; align-items:center; gap:10px;
+    border:1px solid var(--line); border-radius:10px; padding:7px 12px; }
+  .form-l { font-size:9.5px; color:var(--dim); font-family:ui-monospace,Consolas,monospace;
+    letter-spacing:.12em; font-weight:700; }
+  .wl { display:flex; gap:4px; }
+  .wl span { width:20px; height:20px; border-radius:5px; display:flex; align-items:center;
+    justify-content:center; font-size:10px; font-weight:800; font-family:ui-monospace,Consolas,monospace; }
+  .wl .w { background:var(--winbg); color:var(--win); }
+  .wl .l { background:var(--lossbg); color:var(--loss); }
+
+  .statrow { display:flex; border:1px solid var(--line); border-radius:var(--radius);
+    overflow:hidden; margin-bottom:22px; background:var(--panel); }
+  .statcell { flex:1; padding:18px 22px; border-right:1px solid var(--line); }
+  .statcell:last-child { border-right:none; }
+  .statcell .l { font-size:10.5px; color:var(--dim); font-weight:700;
+    font-family:ui-monospace,Consolas,monospace; letter-spacing:.1em; margin-bottom:10px; }
+  .statcell .v { font-size:26px; font-weight:800; letter-spacing:-.5px; }
+  .statcell .v small { font-size:12px; color:var(--faint); font-weight:600; margin-left:4px; }
+
+  .panel { border:1px solid var(--line); border-radius:var(--radius); padding:22px;
+    margin-bottom:22px; background:var(--panel); }
+  .panel-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .panel-title { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700;
+    color:var(--ink-soft); font-family:ui-monospace,Consolas,monospace; letter-spacing:.08em; }
+  .panel-sub { font-size:10px; color:var(--faint); font-family:ui-monospace,Consolas,monospace; letter-spacing:.1em; }
+  .empty { text-align:center; color:var(--dim); font-size:13px; padding:44px 24px;
+    border:1px dashed var(--line); border-radius:var(--radius); }
+
+  .range { display:flex; gap:6px; }
+  .range button { border:1px solid var(--line); background:var(--panel); color:var(--dim);
+    border-radius:8px; padding:5px 12px; font-size:11px; font-weight:700; cursor:pointer;
+    font-family:ui-monospace,Consolas,monospace; }
+  .range button.on { background:var(--active); color:#fff; border-color:var(--active); }
+
+  table { width:100%; border-collapse:collapse; }
+  th { text-align:left; padding:12px 14px; font-size:12px; color:var(--dim); font-weight:600;
+    border-bottom:1px solid var(--line); }
+  td { padding:14px; border-bottom:1px solid var(--line-soft); font-size:13.5px; }
+  tbody tr:hover { background:var(--panel-soft); }
+  .num { text-align:right; }
+
+  .pill { padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600;
+    cursor:pointer; user-select:none; display:inline-block; }
+
+  input, select { background:var(--panel); border:1px solid var(--line); border-radius:9px;
+    color:var(--ink); padding:9px 12px; font-size:13px; width:100%; outline:none;
+    font-family:inherit; height:38px; }
+  input:focus, select:focus { border-color:#c8c8c8; }
+  .fields { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  .fields label { flex:1; min-width:120px; display:block; }
+  .fl { font-size:11px; color:var(--dim); margin-bottom:6px; font-weight:600; }
+  .btn { border:none; border-radius:9px; padding:9px 18px; font-size:13px; font-weight:600;
+    cursor:pointer; font-family:inherit; height:38px; display:inline-flex; align-items:center; gap:6px; }
+  .btn-primary { background:var(--active); color:#fff; }
+  .btn-outline { background:var(--panel); color:var(--ink); border:1px solid var(--line); }
+  .btn-danger { background:transparent; color:var(--loss); border:1px solid transparent; }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+  .hint { font-size:11.5px; color:var(--dim); margin-top:12px; }
+  .err { color:var(--loss); font-size:12.5px; margin:0 0 18px; background:var(--lossbg);
+    border:1px solid #fca5a5; border-radius:10px; padding:11px 16px; }
+  svg text { font-family:ui-monospace,Consolas,monospace; }
+  code { color:var(--profit); background:var(--panel-soft); padding:1px 5px; border-radius:4px; }
+  a { color:var(--profit); }
+
+  .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .cal .dow { font-size:9px; color:var(--dim); text-align:center; font-weight:700;
+    font-family:ui-monospace,Consolas,monospace; padding-bottom:2px; }
+  .cal .cell { min-height:52px; border-radius:7px; padding:5px 6px; font-size:11px;
+    display:flex; flex-direction:column; background:var(--panel-soft); border:1px solid var(--line-soft); }
+  .cal .cell.win { background:var(--winbg); border-color:#bbf7d0; }
+  .cal .cell.loss { background:var(--lossbg); border-color:#fecaca; }
+  .cal .cell.mix { background:var(--warnbg); border-color:#fde68a; }
+  .cal .cell .d { font-weight:700; color:var(--ink-soft); font-size:11px; }
+  .cal .cell .p { font-size:10px; font-weight:700; margin-top:auto; }
+  .cal .cell.empty2 { background:transparent; border:none; min-height:52px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="brand-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 3-3 3 3 5-6"/></svg></div><div class="brand-t">betledger</div></div>
+    <button class="navitem create" data-tab="add"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>快速录入</button>
+    <nav id="nav"></nav>
+    <div class="side-sp"></div>
+  </aside>
+  <div class="main">
+    <div class="topbar"><h1 id="pageTitle">仪表盘</h1></div>
+    <div class="content" id="main"></div>
+  </div>
+</div>
+<script src="dashboard.js"></script>
+</body>
+</html>

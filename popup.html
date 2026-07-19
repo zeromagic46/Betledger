@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><style>
+  body { width:250px; margin:0; background:#fff; color:#0a0a0a;
+    font-family:'Inter','Segoe UI','Microsoft YaHei',system-ui,sans-serif; padding:16px; }
+  .logo { display:flex; align-items:center; gap:9px; margin-bottom:4px; }
+  .ic { width:30px; height:30px; border-radius:8px; background:#111; display:flex;
+    align-items:center; justify-content:center; color:#fff; }
+  .t { font-weight:800; font-size:16px; letter-spacing:-.3px; }
+  .sub { font-size:11px; color:#8a8a8a; margin:8px 0 14px; }
+  button { display:block; width:100%; border:none; border-radius:9px; padding:11px 0;
+    font-size:13px; font-weight:600; cursor:pointer; margin-bottom:9px; font-family:inherit; }
+  #capture { background:#111; color:#fff; }
+  #dash { background:#fff; color:#0a0a0a; border:1px solid #e5e5e5; }
+  #msg { font-size:11px; color:#dc2626; min-height:14px; }
+</style></head><body>
+  <div class="logo"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 3-3 3 3 5-6"/></svg></div><div class="t">betledger</div></div>
+  <div class="sub">框选注单 · AI 识别 · 数据本地</div>
+  <button id="capture">框选注单区域</button>
+  <button id="dash">打开仪表盘</button>
+  <div id="msg"></div>
+  <script src="popup.js"></script>
+</body></html>

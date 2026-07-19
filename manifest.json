@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "BetLedger 注单追踪",
+  "version": "4.4.0",
+  "description": "在任意网站框选注单区域,AI 自动解析并记入本地盈亏账本。数据仅存本地,不上传任何服务器。",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "activeTab",
+    "scripting",
+    "downloads"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "https://*.bcebos.com/*",
+    "https://*/*",
+    "https://aistudio.baidu.com/*",
+    "https://paddleocr.aistudio-app.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
