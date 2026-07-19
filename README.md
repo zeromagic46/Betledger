@@ -8,6 +8,30 @@
 
 ---
 
+## 界面预览
+
+### 仪表盘
+净盈亏、ROI、胜率、累计盈亏曲线、待结算与已结算注单一览。
+
+![仪表盘](./screenshots/screenshot-dashboard.png)
+
+### 注单列表
+支持搜索、多条件筛选、排序与分页，状态一目了然。
+
+![注单列表](./screenshots/screenshot-mybets.png)
+
+### 数据分析
+日历热力图（按月切换）、按运动 / 玩法 / 平台 / 策略 / 赔率区间 / 月份分维度盈亏。
+
+![数据分析](./screenshots/screenshot-analytics.png)
+
+### 工具
+赔率转换、凯利公式注码、两向套利计算。
+
+![工具](./screenshots/screenshot-tools.png)
+
+---
+
 ## 免责声明
 
 - 本项目仅供**个人学习与投注记录管理**之用，作者不对任何使用后果负责。
